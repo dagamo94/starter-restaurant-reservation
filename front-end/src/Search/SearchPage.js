@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import ReservationList from "../dashboard/ReservationList";
 import { listReservations, cancelReservation } from "../utils/api";
@@ -10,7 +9,6 @@ function SearchPage() {
     const [mobileNumber, setMobileNumber] = useState("");
     const [reservations, setReservations] = useState([]);
     const [errors, setErrors] = useState(null);
-    const history = useHistory();
 
     function onCancel(reservation_id) {
         cancelReservation(reservation_id)
@@ -32,12 +30,14 @@ function SearchPage() {
         setErrors(null);
         setReservations([]);
 
+        const abortController = new AbortController();
         // call listReservations
-        listReservations({ mobile_number: mobileNumber })
+        listReservations({ mobile_number: mobileNumber }, abortController.signal)
             .then((response) => {
                 setReservations(response);
             })
             .catch(setErrors);
+        return () => abortController.abort();
     }
 
     return (
